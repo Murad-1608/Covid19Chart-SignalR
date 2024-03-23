@@ -1,23 +1,21 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using WebAPI.Models;
 
 namespace WebAPI.Controllers
 {
-    public class CovidsController(CovidService covidService) : Controller
+    [Route("api/[controller]")]
+    [ApiController]
+    public class CovidsController(CovidService covidService) : ControllerBase
     {
-        public IActionResult Index()
-        {
-            return View();
-        }
-
         [HttpPost]
         public async Task<IActionResult> SaveCovid(Covid covid)
         {
             await covidService.SaveCovid(covid);
 
-            IQueryable<Covid> covidList = covidService.GetList();
+            List<CovidChart> covidList = covidService.GetCovidChartList();
 
-            return Ok(covid);
+            return Ok(covidList);
         }
 
         [HttpGet]
@@ -32,7 +30,7 @@ namespace WebAPI.Controllers
                     var newCovid = new Covid
                     {
                         City = item,
-                        CovidDate = DateTime.Now.AddDays(2),
+                        CovidDate = DateTime.Now.AddDays(x),
                         Count = random.Next(100, 1000)
                     };
                     covidService.SaveCovid(newCovid).Wait();
@@ -42,6 +40,5 @@ namespace WebAPI.Controllers
 
             return Ok("Datalar yuklendi");
         }
-
     }
 }
